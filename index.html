@@ -138,22 +138,20 @@ canvas{display:block;border:2px solid rgba(255,200,0,0.2);border-radius:10px}
     <div id="ult-desc">Mount your legendary creature for a powerful rampage! Each hero rides a unique beast.</div>
   </div>
   <div id="magic-bar">
-    <div id="magic-label">Magic</div>
+    <div id="magic-label">Skills</div>
     <div class="mskill" id="ms1">
-      <div class="mskill-icon" id="ms1-icon" style="background:linear-gradient(135deg,#7a1a00,#cc3300)">☄️<div class="mskill-cd" id="ms1-cd" style="display:none">0</div></div>
-      <div class="mskill-name">Meteor</div><div class="mskill-key">[U]</div>
+      <div class="mskill-icon" id="ms1-icon"><span id="ms1-emoji">?</span><div class="mskill-cd" id="ms1-cd" style="display:none">0</div></div>
+      <div class="mskill-name" id="ms1-name">—</div><div class="mskill-key">[U]</div>
     </div>
     <div class="mskill" id="ms2">
-      <div class="mskill-icon" id="ms2-icon" style="background:linear-gradient(135deg,#7a3a00,#dd7700)">🔥<div class="mskill-cd" id="ms2-cd" style="display:none">0</div></div>
-      <div class="mskill-name">Firewall</div><div class="mskill-key">[I]</div>
+      <div class="mskill-icon" id="ms2-icon"><span id="ms2-emoji">?</span><div class="mskill-cd" id="ms2-cd" style="display:none">0</div></div>
+      <div class="mskill-name" id="ms2-name">—</div><div class="mskill-key">[I]</div>
     </div>
     <div class="mskill" id="ms3">
-      <div class="mskill-icon" id="ms3-icon" style="background:linear-gradient(135deg,#6a0a00,#ff2200)">💨<div class="mskill-cd" id="ms3-cd" style="display:none">0</div></div>
-      <div class="mskill-name">Fire Blast</div><div class="mskill-key">[O]</div>
+      <div class="mskill-icon" id="ms3-icon"><span id="ms3-emoji">?</span><div class="mskill-cd" id="ms3-cd" style="display:none">0</div></div>
+      <div class="mskill-name" id="ms3-name">—</div><div class="mskill-key">[O]</div>
     </div>
-    <div style="flex:1;font-size:10px;color:#555;line-height:1.5">
-      ☄️ Meteor: massive impact in front | 🔥 Firewall: blocking flame barrier | 💨 Fire Blast: burns over time
-    </div>
+    <div id="skill-desc" style="flex:1;font-size:10px;color:#555;line-height:1.5">Select a class to see abilities</div>
   </div>
   <div id="cw">
     <canvas id="gc" width="860" height="440"></canvas>
@@ -162,7 +160,7 @@ canvas{display:block;border:2px solid rgba(255,200,0,0.2);border-radius:10px}
       <div class="sub">Battle through 5 levels to rescue the princess!<br>Pick your hero and a sidekick companion.</div>
       <div id="picker"></div>
       <div id="sk-pick-area">
-        <p>Choose your sidekick:</p>
+        <p>Choose your sidekick: <span id="sk-note" style="color:#ffd700;font-size:10px"></span></p>
         <div id="sk-picker"></div>
       </div>
       <button id="pbtn">Start Game</button>
@@ -180,7 +178,7 @@ canvas{display:block;border:2px solid rgba(255,200,0,0.2);border-radius:10px}
     <div class="ci"><span class="k">J</span> attack</div>
     <div class="ci"><span class="k">K</span> magic</div>
     <div class="ci"><span class="k">L</span> arrow</div>
-    <div class="ci"><span class="k">1–4</span> swap hero</div>
+    <div class="ci"><span class="k">1–6</span> swap class</div>
     <div class="ci"><span class="k">U</span> Meteor</div>
     <div class="ci"><span class="k">I</span> Firewall</div>
     <div class="ci"><span class="k">O</span> Fire Blast</div>
@@ -225,14 +223,42 @@ const LEVELS=[
    HEROES
 ═══════════════════════════════════════ */
 const HEROES=[
-  {name:'Knight',   emoji:'⚔',  col:'#4488ee',  ol:'#1a3a8a', belt:'#7a3a10', magic:'#66ccff', mfx:'freeze',
-   desc:'Ice magic',  stats:{spd:1.20,jump:8.0,atk:20,mdef:14,hp:130}},
-  {name:'Paladin',  emoji:'🛡',  col:'#ee4422',  ol:'#8b1a08', belt:'#8b6010', magic:'#ff8844', mfx:'burn',
-   desc:'Fire magic',stats:{spd:1.00,jump:7.6,atk:24,mdef:9, hp:160}},
-  {name:'Wizard',   emoji:'🔮', col:'#9944cc',  ol:'#5a1a88', belt:'#3a1060', magic:'#cc88ff', mfx:'stun',
-   desc:'Lightning',  stats:{spd:1.10,jump:7.8,atk:14,mdef:25,hp:100}},
-  {name:'Barbarian',emoji:'🪓', col:'#44bb55',  ol:'#1a5a28', belt:'#4a2808', magic:'#88ff88', mfx:'rage',
-   desc:'Raw power',  stats:{spd:1.40,jump:8.4,atk:30,mdef:6, hp:180}},
+  // 0: Paladin
+  {name:'Paladin',    emoji:'🛡', col:'#f0c040', ol:'#8a6800', belt:'#cc9900', magic:'#ffffaa', mfx:'holy',
+   desc:'Heal & Smite', stats:{spd:1.00,jump:7.6,atk:22,mdef:18,hp:170},
+   skill1:{name:'Heal',     key:'U', emoji:'💚', color:'#00ff88', cd:600},
+   skill2:{name:'Smite',    key:'I', emoji:'✨', color:'#ffff00', cd:360},
+   skill3:{name:'Consecrate',key:'O',emoji:'🌟', color:'#ffd700', cd:240}},
+  // 1: Barbarian
+  {name:'Barbarian',  emoji:'🪓', col:'#cc3300', ol:'#6a0000', belt:'#4a1808', magic:'#ff6644', mfx:'rage',
+   desc:'Berserker fury', stats:{spd:1.30,jump:8.2,atk:32,mdef:6, hp:190},
+   skill1:{name:'Berserk',  key:'U', emoji:'💢', color:'#ff2200', cd:480},
+   skill2:{name:'Blood Lust',key:'I',emoji:'🩸', color:'#cc0000', cd:300},
+   skill3:{name:'Tornado',  key:'O', emoji:'🌪', color:'#ff8800', cd:420}},
+  // 2: Templar Knight
+  {name:'Templar',    emoji:'⚔', col:'#4488ee', ol:'#1a3a8a', belt:'#7a3a10', magic:'#aaddff', mfx:'stun',
+   desc:'Shield & Sword', stats:{spd:1.10,jump:7.8,atk:24,mdef:22,hp:160},
+   skill1:{name:'Ground Smite',key:'U',emoji:'💥',color:'#88ccff',cd:300},
+   skill2:{name:'Shield',   key:'I', emoji:'🛡', color:'#ffffff', cd:360},
+   skill3:{name:'Shining Sword',key:'O',emoji:'⚡',color:'#ffff88',cd:480}},
+  // 3: Mage
+  {name:'Mage',       emoji:'🔮', col:'#9944cc', ol:'#5a1a88', belt:'#3a1060', magic:'#cc88ff', mfx:'burn',
+   desc:'Elemental magic', stats:{spd:1.10,jump:7.8,atk:16,mdef:28,hp:110},
+   skill1:{name:'Firewall',  key:'U', emoji:'🔥', color:'#ff6600', cd:360},
+   skill2:{name:'Meteor Shower',key:'I',emoji:'☄️',color:'#ff4400',cd:480},
+   skill3:{name:'Lightning', key:'O', emoji:'⚡', color:'#88ffff', cd:300}},
+  // 4: Archer
+  {name:'Archer',     emoji:'🏹', col:'#44aa44', ol:'#1a5a28', belt:'#2a4808', magic:'#88ff88', mfx:'bleed',
+   desc:'Ranged attacks', stats:{spd:1.35,jump:8.4,atk:20,mdef:10,hp:130},
+   skill1:{name:'Bomb Arrow', key:'U', emoji:'💣', color:'#ff8800', cd:300},
+   skill2:{name:'Arrow Rain',  key:'I', emoji:'🌧', color:'#88ff44', cd:480},
+   skill3:{name:'Evade',      key:'O', emoji:'💨', color:'#aaffaa', cd:240}},
+  // 5: Necromancer
+  {name:'Necromancer',emoji:'💀', col:'#7722aa', ol:'#330066', belt:'#220044', magic:'#cc44ff', mfx:'rot',
+   desc:'Raise the dead', stats:{spd:1.05,jump:7.6,atk:18,mdef:20,hp:120},
+   skill1:{name:'Raise Dead',  key:'U', emoji:'💀', color:'#88ff44', cd:420},
+   skill2:{name:'Health Syphon',key:'I',emoji:'🫀', color:'#cc00ff', cd:300},
+   skill3:{name:'Rot',         key:'O', emoji:'☠️', color:'#44ff44', cd:240}},
 ];
 
 /* ═══════════════════════════════════════
@@ -272,36 +298,53 @@ let heroIdx=0,skIdx=0;
 let player,sidekick,enemies,particles,arrows,mbolts,floaters,firewalls,meteors;
 let camX,score,live,rafId,wvMsg,currentLevel,levelComplete;
 let mag1Cd=0,mag2Cd=0,mag3Cd=0;
-const MAG1_CD=420,MAG2_CD=360,MAG3_CD=200; // cooldowns in frames
+// Cooldowns are now per-class, stored in HEROES[i].skill1/2/3.cd (in frames)
+const MAG1_CD=420,MAG2_CD=360,MAG3_CD=200; // fallback
+// Paladin state
+let palHealCd=0,berserkActive=false,berserkTimer=0,bloodLustActive=false;
+let shieldActive=false,shieldTimer=0,shiningSwordActive=false,shiningSwordTimer=0;
+let arrowRainActive=false,arrowRainTimer=0,arrowRainX=0;
+let evadeActive=false,evadeTimer=0;
+let tornadoActive=false,tornadoTimer=0;
+let ghouls=[]; // Necromancer's raised dead
+let healthSyphonActive=false,healthSyphonTimer=0;
+let consecrateFx=[]; // Paladin consecrate zones
+let mountBreathTimer=0; // Dragon auto-breath timer
 // Ultimate mount system
 let ultCd=0,mounted=false,mount=null;
 const ULT_CD=1800; // 30s cooldown
-// Mount definitions per hero index
+// Mount definitions per hero index (matches HEROES order)
 const MOUNTS=[
-  // 0: Knight → Griffin (majestic eagle-lion, dive-bomb ability)
-  {name:'Griffin',  key:'Q', abilName:'Dive Bomb',
-   col:'#d4aa40',wing:'#c8962a',beak:'#ffcc00',oc:'#5a3a00',
-   hpMult:1.4, spdMult:2.2, abilCd:180,
-   abilName2:'Talon Strike',
-   desc:'Eagle-lion hybrid. Talon Strike hits all enemies on screen.'},
-  // 1: Paladin → Armoured Warhorse (heavy charger, ground-stomp ability)
-  {name:'Warhorse', key:'Q', abilName:'War Stomp',
-   col:'#888888',mane:'#444444',armor:'#cc9900',oc:'#222222',
-   hpMult:2.0, spdMult:1.8, abilCd:150,
-   abilName2:'War Stomp',
-   desc:'Armoured destrier. War Stomp stuns and damages all nearby foes.'},
-  // 2: Wizard → Dragon (fire-breathing flying dragon)
-  {name:'Dragon',   key:'Q', abilName:'Dragon Breath',
-   col:'#cc2200',scale:'#aa1100',wing:'#881100',belly:'#ff6600',oc:'#440000',
-   hpMult:1.2, spdMult:2.4, abilCd:120,
-   abilName2:'Dragon Breath',
-   desc:'Ancient fire dragon. Dragon Breath torches the entire screen.'},
-  // 3: Barbarian → War Bear (giant battle-scarred bear, bear-charge ability)
-  {name:'War Bear', key:'Q', abilName:'Bear Charge',
-   col:'#7a4a20',fur:'#5a3010',scar:'#cc4444',oc:'#2a1008',
-   hpMult:2.5, spdMult:1.6, abilCd:200,
+  // 0: Paladin → Eagle (flying, screams and pushes enemies to edge)
+  {name:'Eagle',      col:'#c8a840',oc:'#5a3a00',
+   hpMult:1.5,spdMult:2.2,abilCd:180,airborne:true,
+   abilName2:'Eagle Scream',
+   desc:'Flying eagle. Scream pushes all enemies to the map edge.'},
+  // 1: Barbarian → Bear (charges forward, knocks back + stuns)
+  {name:'Bear',       col:'#7a4a20',oc:'#2a1008',
+   hpMult:2.5,spdMult:1.8,abilCd:200,airborne:false,
    abilName2:'Bear Charge',
-   desc:'Massive battle bear. Charge tramples every enemy in the level.'},
+   desc:'War bear. Charge knocks all enemies back and stuns for 2s.'},
+  // 2: Templar Knight → Warhorse (tramples enemies continuously)
+  {name:'Warhorse',   col:'#888888',oc:'#222222',
+   hpMult:2.0,spdMult:2.0,abilCd:150,airborne:false,
+   abilName2:'Trample',
+   desc:'Warhorse that tramples over enemies doing constant damage.'},
+  // 3: Mage → Fire Dragon (breathes fire every 2s, burn all in front)
+  {name:'Fire Dragon',col:'#cc2200',oc:'#440000',
+   hpMult:1.3,spdMult:2.2,abilCd:120,airborne:true,
+   abilName2:'Dragon Breath',
+   desc:'Fire dragon breathes flames every 2s, burning all enemies ahead.'},
+  // 4: Archer → Panther (swipes enemies, knockback + stun)
+  {name:'Panther',    col:'#1a1a1a',oc:'#000000',
+   hpMult:1.6,spdMult:2.8,abilCd:160,airborne:false,
+   abilName2:'Panther Swipe',
+   desc:'Sleek panther. Swipe knocks back and stuns enemies.'},
+  // 5: Necromancer → Bone Dragon (breathes ice, freezes 2s)
+  {name:'Bone Dragon',col:'#ccccaa',oc:'#888866',
+   hpMult:1.4,spdMult:2.0,abilCd:140,airborne:true,
+   abilName2:'Ice Breath',
+   desc:'Bone dragon breathes ice, freezing enemies for 2s.'},
 ];
 let plvl,pxp,pxpN,best=0;
 let totalEnemiesInLevel,enemiesKilled,bossSpawned,bossKilled,spawnedCount,spawnTimer;
@@ -364,7 +407,7 @@ window.addEventListener('keydown',e=>{
   K[e.key.toLowerCase()]=true;
   const prev=['j','k','l',' ','arrowup','arrowdown','arrowleft','arrowright','s','w','u','i','o','q','e'];
   if(prev.includes(e.key.toLowerCase()))e.preventDefault();
-  if(live&&['1','2','3','4'].includes(e.key))swapHero(+e.key-1);
+  if(live&&['1','2','3','4','5','6'].includes(e.key))swapHero(+e.key-1);
   if(live&&e.key.toLowerCase()==='u'&&mag1Cd<=0)doMag1();
   if(live&&e.key.toLowerCase()==='i'&&mag2Cd<=0)doMag2();
   if(live&&e.key.toLowerCase()==='o'&&mag3Cd<=0)doMag3();
@@ -421,8 +464,14 @@ function startLevel(lvlIdx){
   totalEnemiesInLevel=lvl.enemyCount+1; // +1 for boss
   enemiesKilled=0;bossSpawned=false;bossKilled=false;
   spawnedCount=0;spawnTimer=0;
-  enemies=[];particles=[];arrows=[];mbolts=[];floaters=[];firewalls=[];meteors=[];ghouls=[];consecrateFx=[];
+  enemies=[];particles=[];arrows=[];mbolts=[];floaters=[];firewalls=[];meteors=[];
+  ghouls=[];consecrateFx=[];
   mag1Cd=0;mag2Cd=0;mag3Cd=0;
+  berserkActive=false;berserkTimer=0;bloodLustActive=false;
+  shieldActive=false;shieldTimer=0;shiningSwordActive=false;shiningSwordTimer=0;
+  arrowRainActive=false;arrowRainTimer=0;evadeActive=false;evadeTimer=0;
+  tornadoActive=false;tornadoTimer=0;healthSyphonActive=false;
+  mountBreathTimer=0;
   ultCd=0;mounted=false;mount=null;
   const mbEl2=document.getElementById("mount-bar");
   if(mbEl2)mbEl2.style.display="none";
@@ -439,6 +488,7 @@ function initGame(){
   live=true;
   startLevel(0);
   updateHUD();
+  updateSkillHUD();
 }
 
 function swapHero(i){
@@ -450,7 +500,9 @@ function swapHero(i){
   Object.assign(player,{col:h.col,ol:h.ol,belt:h.belt,magic:h.magic,
     maxHp:h.stats.hp,hp:Math.round(h.stats.hp*r),
     spd:h.stats.spd,jump:h.stats.jump,atk:h.stats.atk,mdef:h.stats.mdef});
+  mag1Cd=0;mag2Cd=0;mag3Cd=0;
   updateHUD();
+  updateSkillHUD();
 }
 
 /* ═══════════════════════════════════════
@@ -578,6 +630,7 @@ function update(){
 
   /* Sidekick AI */
   updateSidekick();
+  /* Class special states (ghouls, arrow rain, berserk, tornado, etc.) */
   updateClassStates();
 
   /* Projectiles */
@@ -736,9 +789,12 @@ function update(){
     // Sword swing
     if(p.atkT>0){
       const rdx=(e.wx-p.wx)*p.facing;
-      if(rdx>-8&&rdx<p.w+52&&Math.abs(p.y-e.y)<50&&e.iCd<=0){
+      const swingR=shiningSwordActive?p.w+100:p.w+52;
+      if(rdx>-8&&rdx<swingR&&Math.abs(p.y-e.y)<50&&e.iCd<=0){
         const bonus=p.combo>3?Math.floor(p.atk*0.7):p.combo>1?Math.floor(p.atk*0.3):0;
-        const d=p.atk+bonus;
+        const berserkBonus=berserkActive?Math.floor(p.atk*1.0):0;
+        const shinBonus=shiningSwordActive?Math.floor(p.atk*1.0):0;
+        const d=p.atk+bonus+berserkBonus+shinBonus;
         hurtE(e,d);e.iCd=22;e.knockback=p.facing*4;
         burst(e.wx,e.y-e.h*0.5,'#ffd700',7);sf(e.wx,e.y-e.h,d,'#ffd700');
       }
@@ -916,15 +972,25 @@ function hurtE(e,dmg){
     burst(e.wx,e.y-e.h/2,e.col,8);
     updateHUD();
   }
+  // Blood Lust — regen on kill/hit
+  if(bloodLustActive&&dmg>0){
+    player.hp=Math.min(player.maxHp,player.hp+Math.floor(dmg*0.3));
+    updateHUD();
+  }
 }
 function applyFx(e){
   const fx=HEROES[heroIdx].mfx;
   if(fx==='freeze')e.frozen=Math.min(e.frozen+110,220);
   if(fx==='stun')  e.stunned=Math.min(e.stunned+90,180);
   if(fx==='burn')  e.burning=Math.min(e.burning+160,320);
+  if(fx==='holy')  e.stunned=Math.min(e.stunned+60,120);
+  if(fx==='rot')   e.burning=Math.min(e.burning+80,300);
+  if(fx==='bleed') e.burning=Math.min(e.burning+50,200);
+  if(fx==='rage')  {/* rage — extra damage handled in doAtk */}
 }
 function doAtk(){
-  player.atkCd=26;player.atkT=16;
+  player.atkCd=berserkActive?13:26;
+  player.atkT=shiningSwordActive?26:16;
   player.combo++;player.comboT=55;
   updateHUD();
 }
@@ -941,124 +1007,513 @@ function doArr(){
   arrows.push({wx:player.wx,y:player.y-player.h*0.65,vx:player.facing*11,vy:-1.8,life:90,col:player.ol});
 }
 /* ═══════════════════════════════════════
-   THREE MAGIC SKILLS
+   CLASS SKILLS (6 classes × 3 skills each)
+   heroIdx: 0=Paladin 1=Barbarian 2=Templar 3=Mage 4=Archer 5=Necromancer
 ═══════════════════════════════════════ */
 function doMag1(){
-  // ☄️ METEOR — massive boulder crashes down in front of hero
-  mag1Cd=MAG1_CD;
-  const targetWx=player.wx+player.facing*220;
-  meteors.push({
-    wx:targetWx,y:-60,
-    r:28,spd:4,phase:"falling",t:0,impactT:0,
-  });
-  // Warning shadow on ground
-  for(let i=0;i<8;i++){
-    particles.push({wx:targetWx+(Math.random()-0.5)*40,y:GROUND-2,
-      vx:0,vy:-0.5,color:"rgba(255,80,0,0.6)",life:55,maxLife:55,alpha:0.8,r:6+Math.random()*8});
-  }
-  burst(player.wx,player.y-player.h,"#ff6600",8);
+  const h=HEROES[heroIdx];
+  mag1Cd=h.skill1.cd;
+  // Sync player position from mount before skill fires
+  if(mounted&&mount){player.wx=mount.wx;player.y=mount.airborne?mount.y-10:mount.y;player.facing=mount.facing;}
+  if(heroIdx===0) doSkillHeal();
+  else if(heroIdx===1) doSkillBerserk();
+  else if(heroIdx===2) doSkillGroundSmite();
+  else if(heroIdx===3) doSkillFirewall();
+  else if(heroIdx===4) doSkillBombArrow();
+  else if(heroIdx===5) doSkillRaiseDead();
 }
-
 function doMag2(){
-  // 🔥 FIREWALL — a wall of fire appears in front that blocks and burns enemies
-  mag2Cd=MAG2_CD;
-  const wallWx=player.wx+player.facing*110;
-  firewalls.push({
-    wx:wallWx, y:GROUND,
-    w:30, h:120,
-    life:280, maxLife:280,
-    wobT:0,
-    facing:player.facing,
-  });
-  // Spawn visual launch burst
-  burst(player.wx,player.y-player.h*0.5,"#ff8800",12);
-  for(let i=0;i<6;i++){
-    particles.push({wx:player.wx+player.facing*(30+i*15),y:GROUND-20,
-      vx:player.facing*3,vy:-3-Math.random()*4,
-      color:i%2===0?"#ff4400":"#ffaa00",life:20,maxLife:20,alpha:1,r:8});
-  }
-  showMsg("🔥 Firewall!","#ff8800",50);
+  const h=HEROES[heroIdx];
+  mag2Cd=h.skill2.cd;
+  if(mounted&&mount){player.wx=mount.wx;player.y=mount.airborne?mount.y-10:mount.y;player.facing=mount.facing;}
+  if(heroIdx===0) doSkillSmite();
+  else if(heroIdx===1) doSkillBloodLust();
+  else if(heroIdx===2) doSkillShield();
+  else if(heroIdx===3) doSkillMeteorShower();
+  else if(heroIdx===4) doSkillArrowRain();
+  else if(heroIdx===5) doSkillHealthSyphon();
+}
+function doMag3(){
+  const h=HEROES[heroIdx];
+  mag3Cd=h.skill3.cd;
+  if(mounted&&mount){player.wx=mount.wx;player.y=mount.airborne?mount.y-10:mount.y;player.facing=mount.facing;}
+  if(heroIdx===0) doSkillConsecrate();
+  else if(heroIdx===1) doSkillTornado();
+  else if(heroIdx===2) doSkillShiningSword();
+  else if(heroIdx===3) doSkillLightning();
+  else if(heroIdx===4) doSkillEvade();
+  else if(heroIdx===5) doSkillRot();
 }
 
-function doMag3(){
-  // 💨 FIRE BLAST — fast cone of fire that burns all enemies it touches
-  mag3Cd=MAG3_CD;
-  const blastR=180, blastW=120;
+/* ── PALADIN skills ──────────────────────────────── */
+function doSkillHeal(){
+  // Heal to full health
+  player.hp=player.maxHp;
+  updateHUD();
+  showMsg('💚 Full Heal!','#00ff88',70);
+  for(let i=0;i<20;i++){
+    const a=Math.random()*Math.PI*2;
+    particles.push({wx:player.wx,y:player.y-player.h*0.5,
+      vx:Math.cos(a)*5,vy:Math.sin(a)*5-3,
+      color:'#00ff88',life:35,maxLife:35,alpha:1,r:5+Math.random()*5});
+  }
+}
+function doSkillSmite(){
+  // Light pillar comes down from sky in an AoE in front
+  const cx=player.wx+player.facing*160;
+  showMsg('✨ Smite!','#ffff44',55);
+  // Visual: tall light column
+  for(let i=0;i<30;i++){
+    particles.push({wx:cx+(Math.random()-0.5)*60,y:-20+Math.random()*GROUND,
+      vx:(Math.random()-0.5)*2,vy:6+Math.random()*4,
+      color:i%3===0?'#ffffff':'#ffff88',life:30,maxLife:30,alpha:0.9,r:4+Math.random()*6});
+  }
+  // Damage AoE
+  enemies.forEach(e=>{
+    if(e.dead)return;
+    if(Math.abs(e.wx-cx)<90&&Math.abs(e.y-GROUND)<80){
+      const d=Math.floor(player.atk*3.5);
+      hurtE(e,d);sf(e.wx,e.y-e.h,d,'#ffff44');
+      e.stunned=Math.min((e.stunned||0)+120,240);
+      burst(e.wx,e.y-e.h*0.5,'#ffff88',8);
+    }
+  });
+}
+function doSkillConsecrate(){
+  // AoE in front of paladin — continuous burn damage zone
+  const zWx=player.wx+player.facing*120;
+  showMsg('🌟 Consecrate!','#ffd700',55);
+  consecrateFx.push({wx:zWx,y:GROUND,life:360,maxLife:360,r:100,wobT:0});
+  burst(zWx,GROUND-10,'#ffd700',14);
+}
+
+/* ── BARBARIAN skills ────────────────────────────── */
+function doSkillBerserk(){
+  berserkActive=true;
+  berserkTimer=480; // 8 seconds
+  showMsg('💢 BERSERK!','#ff2200',70);
+  burst(player.wx,player.y-player.h*0.5,'#ff2200',20);
+  burst(player.wx,player.y-player.h*0.5,'#ff8800',12);
+}
+function doSkillBloodLust(){
+  bloodLustActive=!bloodLustActive;
+  showMsg(bloodLustActive?'🩸 Blood Lust ON!':'🩸 Blood Lust OFF','#cc0000',50);
+  burst(player.wx,player.y-player.h*0.5,'#cc0000',10);
+}
+function doSkillTornado(){
+  tornadoActive=true;
+  tornadoTimer=200; // ~3.3 seconds
+  showMsg('🌪 Tornado!','#ff8800',60);
+  burst(player.wx,player.y-player.h*0.5,'#ff8800',18);
+}
+
+/* ── TEMPLAR KNIGHT skills ───────────────────────── */
+function doSkillGroundSmite(){
+  showMsg('💥 Ground Smite!','#88ccff',55);
+  enemies.forEach(e=>{
+    if(e.dead)return;
+    const dist=Math.abs(e.wx-player.wx);
+    if(dist<180&&Math.abs(e.y-player.y)<60){
+      const d=Math.floor(player.atk*2);
+      hurtE(e,d);sf(e.wx,e.y-e.h,d,'#88ccff');
+      e.stunned=Math.min((e.stunned||0)+180,360);
+      e.knockback=(e.wx>player.wx?1:-1)*9;
+      burst(e.wx,e.y-e.h*0.4,'#88ccff',8);
+    }
+  });
+  // Ground shockwave
+  for(let i=0;i<16;i++){
+    const a=i*Math.PI*2/16;
+    particles.push({wx:player.wx+Math.cos(a)*80,y:GROUND,
+      vx:0,vy:-4-Math.random()*4,
+      color:'#88ccff',life:28,maxLife:28,alpha:1,r:6+Math.random()*4});
+  }
+}
+function doSkillShield(){
+  shieldActive=true;
+  shieldTimer=180; // 3 seconds
+  showMsg('🛡 Shield — Invincible!','#ffffff',55);
+  enemies.forEach(e=>{
+    if(e.dead)return;
+    if(Math.abs(e.wx-player.wx)<100){
+      e.knockback=(e.wx>player.wx?1:-1)*12;
+      e.stunned=Math.min((e.stunned||0)+60,120);
+    }
+  });
+  burst(player.wx,player.y-player.h*0.5,'#ffffff',16);
+}
+function doSkillShiningSword(){
+  shiningSwordActive=true;
+  shiningSwordTimer=360; // 6 seconds
+  showMsg('⚡ Shining Sword!','#ffff88',60);
+  burst(player.wx,player.y-player.h*0.5,'#ffff88',14);
+  for(let i=0;i<8;i++){
+    particles.push({wx:player.wx+player.facing*(30+i*12),y:player.y-player.h*0.6,
+      vx:player.facing*6,vy:(Math.random()-0.5)*3,
+      color:'#ffff44',life:20,maxLife:20,alpha:1,r:8});
+  }
+}
+
+/* ── MAGE skills ─────────────────────────────────── */
+function doSkillFirewall(){
+  // Two walls — one behind and one in front
+  const frontWx=player.wx+player.facing*130;
+  const backWx=player.wx-player.facing*80;
+  firewalls.push({wx:frontWx,y:GROUND,w:30,h:130,life:300,maxLife:300,wobT:0,facing:player.facing});
+  firewalls.push({wx:backWx, y:GROUND,w:30,h:130,life:300,maxLife:300,wobT:0,facing:-player.facing});
+  burst(player.wx,player.y-player.h*0.5,'#ff8800',12);
+  showMsg('🔥 Firewall!','#ff8800',50);
+}
+function doSkillMeteorShower(){
+  // Meteors rain around the mage
+  showMsg('☄️ Meteor Shower!','#ff4400',60);
+  const mx=player.wx; // capture position now
+  for(let i=0;i<6;i++){
+    const offset=(Math.random()-0.5)*400;
+    setTimeout(()=>{
+      if(!live)return;
+      meteors.push({wx:mx+offset,y:-60,r:20,spd:8,phase:"falling",t:0,impactT:0});
+    },i*220);
+  }
+  burst(player.wx,player.y-player.h,'#ff6600',8);
+}
+function doSkillLightning(){
+  // Shock enemies in front for 2 seconds
+  showMsg('⚡ Lightning!','#88ffff',55);
+  const range=220;
   enemies.forEach(e=>{
     if(e.dead)return;
     const dx=(e.wx-player.wx)*player.facing;
-    const dy=Math.abs(e.y-player.y);
-    if(dx>-20&&dx<blastR&&dy<blastW*0.5){
-      // More damage closer to hero
-      const falloff=1-(dx/blastR)*0.5;
-      const d=Math.floor((player.atk*1.4+player.mdef*0.3)*falloff);
-      hurtE(e,d);sf(e.wx,e.y-e.h,d,"#ff4400");
-      e.burning=Math.min((e.burning||0)+250,500);
-      e.knockback=player.facing*5;
-      burst(e.wx,e.y-e.h*0.4,"#ff6600",6);
+    if(dx>-10&&dx<range&&Math.abs(e.y-player.y)<70){
+      const d=Math.floor(player.atk*2+player.mdef*0.5);
+      hurtE(e,d);sf(e.wx,e.y-e.h,d,'#88ffff');
+      e.stunned=Math.min((e.stunned||0)+120,240);
+      // Lightning bolt particles
+      for(let bi=0;bi<8;bi++){
+        particles.push({wx:player.wx+player.facing*(bi*28),y:player.y-player.h*0.5+(Math.random()-0.5)*30,
+          vx:0,vy:0,color:bi%2===0?'#ffffff':'#88ffff',life:18,maxLife:18,alpha:1,r:3+Math.random()*4});
+      }
     }
   });
-  // Visual: cone of fire particles spraying forward
-  for(let i=0;i<22;i++){
-    const spread=(Math.random()-0.5)*0.7;
-    const dist=40+Math.random()*blastR;
-    const spd=8+Math.random()*6;
-    particles.push({
-      wx:player.wx+player.facing*15,
-      y:player.y-player.h*0.5,
-      vx:player.facing*(spd+Math.random()*4)+spread*2,
-      vy:spread*3-1.5,
-      color:["#ff2200","#ff5500","#ff8800","#ffcc00"][Math.floor(Math.random()*4)],
-      life:22+Math.random()*18,maxLife:40,alpha:1,
-      r:5+Math.random()*7,
-    });
-  }
-  // Core flash at cast point
-  for(let i=0;i<3;i++){
-    particles.push({wx:player.wx+player.facing*30,y:player.y-player.h*0.5,
-      vx:player.facing*(10+i*3),vy:(i-1)*2,
-      color:"#ffffff",life:10,maxLife:10,alpha:1,r:12-i*3});
-  }
-  showMsg("💨 Fire Blast!","#ff4400",45);
 }
 
+/* ── ARCHER skills ───────────────────────────────── */
+function doSkillBombArrow(){
+  showMsg('💣 Bomb Arrow!','#ff8800',50);
+  const bx=player.wx+player.facing*60;
+  // Fire arrow that explodes
+  arrows.push({wx:player.wx,y:player.y-player.h*0.65,vx:player.facing*14,vy:-2.0,life:80,col:'#ff8800',bomb:true});
+}
+function doSkillArrowRain(){
+  arrowRainActive=true;
+  arrowRainTimer=180; // 3 seconds
+  arrowRainX=player.wx;
+  showMsg('🌧 Arrow Rain!','#88ff44',60);
+}
+function doSkillEvade(){
+  evadeActive=true;
+  evadeTimer=90; // 1.5 seconds
+  player.knockback=-player.facing*18; // jump back
+  player.vy=-7;
+  player.onGround=false;
+  showMsg('💨 Evade!','#aaffaa',40);
+  burst(player.wx,player.y,'#aaffaa',10);
+}
 
+/* ── NECROMANCER skills ──────────────────────────── */
+function doSkillRaiseDead(){
+  showMsg('💀 Raise Dead!','#88ff44',60);
+  // Spawn 3 ghouls near the player
+  for(let i=0;i<3;i++){
+    ghouls.push({
+      wx:player.wx+(i-1)*50,y:GROUND,vx:0,vy:0,onGround:true,
+      hp:60+player.atk*2,maxHp:60+player.atk*2,
+      atk:Math.floor(player.atk*0.6),spd:1.1,
+      atkCd:0,facing:player.facing,wobT:Math.random()*6,walkT:0,
+      life:900, // ~15s
+    });
+    for(let j=0;j<8;j++){
+      particles.push({wx:player.wx+(i-1)*50,y:GROUND,
+        vx:(Math.random()-0.5)*4,vy:-3-Math.random()*5,
+        color:'#88ff44',life:30,maxLife:30,alpha:1,r:4+Math.random()*4});
+    }
+  }
+}
+function doSkillHealthSyphon(){
+  healthSyphonActive=!healthSyphonActive;
+  showMsg(healthSyphonActive?'🫀 Syphon ON!':'🫀 Syphon OFF','#cc44ff',50);
+  burst(player.wx,player.y-player.h*0.5,'#cc44ff',12);
+}
+function doSkillRot(){
+  showMsg('☠️ Rot!','#44ff44',50);
+  const rotR=180;
+  enemies.forEach(e=>{
+    if(e.dead)return;
+    const dx=(e.wx-player.wx)*player.facing;
+    if(dx>-20&&dx<rotR&&Math.abs(e.y-player.y)<60){
+      // Apply heavy burn (rot DoT)
+      e.burning=Math.min((e.burning||0)+500,900);
+      const d=Math.floor(player.atk*1.2);
+      hurtE(e,d);sf(e.wx,e.y-e.h,d,'#44ff44');
+      burst(e.wx,e.y-e.h*0.4,'#44ff44',6);
+    }
+  });
+  for(let i=0;i<16;i++){
+    particles.push({wx:player.wx+player.facing*(20+i*10),y:player.y-player.h*0.4+(Math.random()-0.5)*40,
+      vx:player.facing*(3+Math.random()*3),vy:(Math.random()-0.5)*2,
+      color:'#44ff44',life:25,maxLife:25,alpha:1,r:5+Math.random()*5});
+  }
+}
+
+/* ═══════════════════════════════════════
+   CLASS STATE UPDATES (ghouls, arrow rain, berserk, etc.)
+═══════════════════════════════════════ */
 function updateClassStates(){
   const p=player;
-  if(berserkActive){berserkTimer--;if(berserkTimer<=0)berserkActive=false;else if(berserkTimer%8===0)particles.push({wx:p.wx+(Math.random()-0.5)*20,y:p.y-p.h*0.5+(Math.random()-0.5)*20,vx:(Math.random()-0.5)*3,vy:-2-Math.random()*2,color:'#ff2200',life:18,maxLife:18,alpha:0.7,r:4+Math.random()*4});}
-  if(shieldActive){shieldTimer--;if(shieldTimer<=0)shieldActive=false;else{p.iCd=10;if(shieldTimer%4===0)particles.push({wx:p.wx+(Math.random()-0.5)*30,y:p.y-p.h*0.5+(Math.random()-0.5)*30,vx:(Math.random()-0.5)*2,vy:-1,color:'#ffffff',life:14,maxLife:14,alpha:0.6,r:4+Math.random()*5});}}
-  if(shiningSwordActive){shiningSwordTimer--;if(shiningSwordTimer<=0)shiningSwordActive=false;else if(shiningSwordTimer%5===0)particles.push({wx:p.wx+p.facing*30,y:p.y-p.h*0.7+(Math.random()-0.5)*25,vx:p.facing*3+(Math.random()-0.5)*2,vy:-1,color:'#ffff44',life:12,maxLife:12,alpha:0.8,r:5+Math.random()*5});}
-  if(tornadoActive){tornadoTimer--;if(tornadoTimer<=0)tornadoActive=false;else{enemies.forEach(e=>{if(!e.dead&&Math.abs(e.wx-p.wx)<120&&Math.abs(e.y-p.y)<50&&e.atkCd<=0){hurtE(e,Math.floor(p.atk*0.6));e.knockback=(e.wx>p.wx?1:-1)*3;e.atkCd=20;}});if(tornadoTimer%3===0){const a=Date.now()*0.05;particles.push({wx:p.wx+Math.cos(a)*55,y:p.y-p.h*0.3+Math.sin(a)*20,vx:Math.cos(a+1)*4,vy:Math.sin(a+1)*4,color:'#ff8800',life:16,maxLife:16,alpha:0.8,r:7+Math.random()*5});}}}
-  if(evadeActive){evadeTimer--;if(evadeTimer<=0)evadeActive=false;else p.iCd=10;}
-  if(healthSyphonActive&&Math.floor(Date.now()/500)%2===0){enemies.forEach(e=>{if(!e.dead&&Math.abs(e.wx-p.wx)<140){const d=Math.max(1,Math.floor(p.atk*0.08));hurtE(e,d);p.hp=Math.min(p.maxHp,p.hp+d*0.5);particles.push({wx:e.wx,y:e.y-e.h*0.5,vx:(p.wx-e.wx)*0.04,vy:-2,color:'#cc44ff',life:20,maxLife:20,alpha:0.8,r:5});updateHUD();}});}
-  if(arrowRainActive&&arrowRainTimer>0){arrowRainTimer--;if(arrowRainTimer<=0)arrowRainActive=false;else if(arrowRainTimer%6===0){arrows.push({wx:arrowRainX+(Math.random()-0.5)*320,y:-20,vx:(Math.random()-0.5)*1.5,vy:14,life:60,col:'#88ff44',rain:true});}}
-  if(mounted&&mount&&heroIdx===3){mountBreathTimer++;if(mountBreathTimer>=120){mountBreathTimer=0;enemies.forEach(e=>{if(!e.dead){const dx=(e.wx-mount.wx)*mount.facing;if(dx>-20&&dx<300&&Math.abs(e.y-mount.y)<100){const d=Math.floor(p.atk*1.5);hurtE(e,d);sf(e.wx,e.y-e.h,d,'#ff6600');e.burning=Math.min((e.burning||0)+200,600);burst(e.wx,e.y-e.h*0.4,'#ff6600',5);}}});for(let i=0;i<10;i++)particles.push({wx:mount.wx+mount.facing*(60+i*20),y:mount.y-30+(Math.random()-0.5)*40,vx:mount.facing*(4+Math.random()*4),vy:(Math.random()-0.5)*2,color:['#ff2200','#ff6600','#ffaa00'][Math.floor(Math.random()*3)],life:20,maxLife:20,alpha:0.8,r:6+Math.random()*8});}}
-  consecrateFx.forEach(z=>{z.life--;z.wobT=(z.wobT||0)+0.08;if(z.life%16===0)enemies.forEach(e=>{if(!e.dead&&Math.abs(e.wx-z.wx)<z.r&&Math.abs(e.y-z.y)<50){const d=Math.max(1,Math.floor(p.atk*0.25));hurtE(e,d);sf(e.wx,e.y-e.h,''+d,'#ffd700');}});if(z.life%6===0)particles.push({wx:z.wx+(Math.random()-0.5)*z.r*2,y:GROUND-Math.random()*30,vx:(Math.random()-0.5)*2,vy:-2-Math.random()*3,color:'#ffd700',life:25,maxLife:25,alpha:1,r:4+Math.random()*4});});
-  consecrateFx=consecrateFx.filter(z=>z.life>0);
-  for(let ai=arrows.length-1;ai>=0;ai--){const a=arrows[ai];if(a.bomb&&(a.y>=GROUND-10||a.life<60)){a.bomb=false;const bx=a.wx,by=Math.min(a.y,GROUND-5);burst(bx,by,'#ff8800',20);burst(bx,by,'#ffff00',10);enemies.forEach(e=>{if(!e.dead&&Math.hypot(e.wx-bx,e.y-by)<110){const d=Math.floor(p.atk*2.5);hurtE(e,d);sf(e.wx,e.y-e.h,d,'#ff8800');e.burning=Math.min((e.burning||0)+200,400);e.knockback=(e.wx>bx?1:-1)*8;}});}}
-  ghouls.forEach(g=>{g.life--;g.wobT=(g.wobT||0)+0.07;if(g.life<=0)return;g.vy=Math.min((g.vy||0)+GRAV,MAXFALL);g.y+=g.vy;if(g.y>=GROUND){g.y=GROUND;g.vy=0;g.onGround=true;}g.wx=Math.max(camX+5,Math.min(camX+CW-5,g.wx));let target=null,best=Infinity;enemies.forEach(e=>{if(!e.dead){const d=Math.abs(e.wx-g.wx);if(d<best){best=d;target=e;}}});if(target){const dx=target.wx-g.wx,absDx=Math.abs(dx);if(absDx>35){g.vx=(dx/absDx)*g.spd;g.facing=dx>0?1:-1;}else g.vx*=0.5;g.wx+=g.vx;if(g.onGround&&Math.abs(g.vx)>0.2)g.walkT=(g.walkT||0)+0.2;if(absDx<50&&(g.atkCd||0)<=0){g.atkCd=55;hurtE(target,g.atk);sf(target.wx,target.y-target.h,g.atk,'#88ff44');burst(target.wx,target.y-target.h*0.4,'#88ff44',5);}}else{const pdx=p.wx-g.wx;g.vx=pdx>0?Math.min(g.spd,pdx*0.05):-Math.min(g.spd,Math.abs(pdx)*0.05);g.wx+=g.vx;g.facing=pdx>0?1:-1;}if((g.atkCd||0)>0)g.atkCd--;});
-  ghouls=ghouls.filter(g=>g.life>0&&g.hp>0);
-}
-function updateMagicHUD(){
-  const skills=[
-    {cdVal:mag1Cd,cdMax:MAG1_CD,id:"ms1"},
-    {cdVal:mag2Cd,cdMax:MAG2_CD,id:"ms2"},
-    {cdVal:mag3Cd,cdMax:MAG3_CD,id:"ms3"},
-  ];
-  skills.forEach(s=>{
-    const icon=document.getElementById(s.id+"-icon");
-    const cdEl=document.getElementById(s.id+"-cd");
-    if(s.cdVal>0){
-      const secs=Math.ceil(s.cdVal/60);
-      cdEl.textContent=secs;
-      cdEl.style.display="flex";
-      icon.classList.remove("ready","active");
-    } else {
-      cdEl.style.display="none";
-      icon.classList.add("ready");
-      icon.classList.remove("active");
+
+  // Berserk (Barbarian) - visual aura
+  if(berserkActive){
+    berserkTimer--;
+    if(berserkTimer<=0)berserkActive=false;
+    if(berserkTimer%8===0){
+      particles.push({wx:p.wx+(Math.random()-0.5)*20,y:p.y-p.h*0.5+(Math.random()-0.5)*20,
+        vx:(Math.random()-0.5)*3,vy:-2-Math.random()*2,
+        color:'#ff2200',life:18,maxLife:18,alpha:0.7,r:4+Math.random()*4});
+    }
+  }
+
+  // Shield invincibility (Templar)
+  if(shieldActive){
+    shieldTimer--;
+    if(shieldTimer<=0){shieldActive=false;}
+    else{
+      p.iCd=10; // stay invincible
+      if(shieldTimer%4===0){
+        particles.push({wx:p.wx+(Math.random()-0.5)*30,y:p.y-p.h*0.5+(Math.random()-0.5)*30,
+          vx:(Math.random()-0.5)*2,vy:-1,
+          color:'#ffffff',life:14,maxLife:14,alpha:0.6,r:4+Math.random()*5});
+      }
+    }
+  }
+
+  // Shining Sword (Templar) - visual
+  if(shiningSwordActive){
+    shiningSwordTimer--;
+    if(shiningSwordTimer<=0)shiningSwordActive=false;
+    if(shiningSwordTimer%5===0){
+      particles.push({wx:p.wx+p.facing*30,y:p.y-p.h*0.7+(Math.random()-0.5)*25,
+        vx:p.facing*3+(Math.random()-0.5)*2,vy:-1,
+        color:'#ffff44',life:12,maxLife:12,alpha:0.8,r:5+Math.random()*5});
+    }
+  }
+
+  // Tornado (Barbarian) - spin damage
+  if(tornadoActive){
+    tornadoTimer--;
+    if(tornadoTimer<=0){tornadoActive=false;}
+    else{
+      enemies.forEach(e=>{
+        if(e.dead)return;
+        const dist=Math.abs(e.wx-p.wx);
+        if(dist<120&&Math.abs(e.y-p.y)<50){
+          if(e.atkCd<=0){
+            const d=Math.floor(p.atk*0.6);
+            hurtE(e,d);e.knockback=(e.wx>p.wx?1:-1)*3;e.atkCd=20;
+          }
+        }
+      });
+      if(tornadoTimer%3===0){
+        const a=Date.now()*0.05;
+        particles.push({wx:p.wx+Math.cos(a)*55,y:p.y-p.h*0.3+Math.sin(a)*20,
+          vx:Math.cos(a+1)*4,vy:Math.sin(a+1)*4,
+          color:'#ff8800',life:16,maxLife:16,alpha:0.8,r:7+Math.random()*5});
+      }
+    }
+  }
+
+  // Evade (Archer)
+  if(evadeActive){
+    evadeTimer--;
+    if(evadeTimer<=0)evadeActive=false;
+    else p.iCd=10; // invincible during evade
+  }
+
+  // Health Syphon (Necromancer) - drain nearby enemies every 30 frames
+  if(healthSyphonActive){
+    // Use berserkTimer as a frame counter hack — just use Date.now
+    if(Math.floor(Date.now()/500)%2===0){ // every ~500ms
+      enemies.forEach(e=>{
+        if(e.dead)return;
+        const dist=Math.abs(e.wx-p.wx);
+        if(dist<140){
+          const drain=Math.max(1,Math.floor(p.atk*0.08));
+          hurtE(e,drain);
+          p.hp=Math.min(p.maxHp,p.hp+drain*0.5);
+          particles.push({wx:e.wx,y:e.y-e.h*0.5,vx:(p.wx-e.wx)*0.04,vy:-2,
+            color:'#cc44ff',life:20,maxLife:20,alpha:0.8,r:5});
+          updateHUD();
+        }
+      });
+    }
+  }
+
+  // ── ARROW RAIN ───────────────────────────────────────────
+  if(arrowRainActive&&arrowRainTimer>0){
+    arrowRainTimer--;
+    if(arrowRainTimer<=0){arrowRainActive=false;}
+    // Spawn a falling arrow every 6 frames
+    if(arrowRainTimer%6===0){
+      const rx=arrowRainX+(Math.random()-0.5)*320;
+      // Rain arrows: start above screen, fall straight down, hit enemies
+      arrows.push({wx:rx,y:-20,vx:(Math.random()-0.5)*1.5,vy:14,life:60,col:'#88ff44',rain:true});
+    }
+  }
+
+  // ── MOUNT AUTO-BREATH (Mage Fire Dragon) ─────────────────
+  if(mounted&&mount&&heroIdx===3){
+    mountBreathTimer++;
+    if(mountBreathTimer>=120){ // every 2s
+      mountBreathTimer=0;
+      enemies.forEach(e=>{
+        if(e.dead)return;
+        const dx=(e.wx-mount.wx)*mount.facing;
+        if(dx>-20&&dx<300&&Math.abs(e.y-mount.y)<100){
+          const d=Math.floor(p.atk*1.5);
+          hurtE(e,d);sf(e.wx,e.y-e.h,d,'#ff6600');
+          e.burning=Math.min((e.burning||0)+200,600);
+          burst(e.wx,e.y-e.h*0.4,'#ff6600',5);
+        }
+      });
+      // Visual breath puff
+      for(let i=0;i<12;i++){
+        particles.push({wx:mount.wx+mount.facing*(60+i*20),y:mount.y-30+(Math.random()-0.5)*40,
+          vx:mount.facing*(4+Math.random()*4),vy:(Math.random()-0.5)*2,
+          color:['#ff2200','#ff6600','#ffaa00'][Math.floor(Math.random()*3)],
+          life:20,maxLife:20,alpha:0.8,r:6+Math.random()*8});
+      }
+    }
+  }
+
+  // ── CONSECRATE ZONES (Paladin) ───────────────────────────
+  consecrateFx.forEach(z=>{
+    z.life--;z.wobT=(z.wobT||0)+0.08;
+    if(z.life%16===0){
+      enemies.forEach(e=>{
+        if(e.dead)return;
+        if(Math.abs(e.wx-z.wx)<z.r&&Math.abs(e.y-z.y)<50){
+          const d=Math.max(1,Math.floor(p.atk*0.25));
+          hurtE(e,d);sf(e.wx,e.y-e.h,''+d,'#ffd700');
+        }
+      });
+    }
+    if(z.life%6===0){
+      particles.push({wx:z.wx+(Math.random()-0.5)*z.r*2,y:GROUND-Math.random()*30,
+        vx:(Math.random()-0.5)*2,vy:-2-Math.random()*3,
+        color:'#ffd700',life:25,maxLife:25,alpha:1,r:4+Math.random()*4});
     }
   });
+  consecrateFx=consecrateFx.filter(z=>z.life>0);
+
+  // ── BOMB ARROWS: explode on ground or low life ────────────
+  for(let ai=arrows.length-1;ai>=0;ai--){
+    const a=arrows[ai];
+    if(!a.bomb)continue;
+    if(a.y>=GROUND-10||a.life<60){
+      // Trigger explosion
+      a.bomb=false;
+      const bx=a.wx,by=Math.min(a.y,GROUND-5);
+      burst(bx,by,'#ff8800',20);burst(bx,by,'#ffff00',10);
+      enemies.forEach(e=>{
+        if(e.dead)return;
+        const dist=Math.hypot(e.wx-bx,e.y-by);
+        if(dist<110){
+          const d=Math.floor(p.atk*2.5);
+          hurtE(e,d);sf(e.wx,e.y-e.h,d,'#ff8800');
+          e.burning=Math.min((e.burning||0)+200,400);
+          e.knockback=(e.wx>bx?1:-1)*8;
+        }
+      });
+    }
+  }
+
+  // ── GHOUL AI (Necromancer's raised dead) ─────────────────
+  ghouls.forEach(g=>{
+    g.life--;
+    g.wobT=(g.wobT||0)+0.07;
+    if(g.life<=0)return;
+    g.vy=Math.min((g.vy||0)+GRAV,MAXFALL);
+    g.y+=g.vy;
+    if(g.y>=GROUND){g.y=GROUND;g.vy=0;g.onGround=true;}
+    g.wx=Math.max(camX+5,Math.min(camX+CW-5,g.wx));
+
+    // Find nearest enemy to attack
+    let target=null,best=Infinity;
+    enemies.forEach(e=>{
+      if(!e.dead){
+        const d=Math.abs(e.wx-g.wx);
+        if(d<best){best=d;target=e;}
+      }
+    });
+    if(target){
+      const dx=target.wx-g.wx;
+      const absDx=Math.abs(dx);
+      // Move toward target
+      if(absDx>35){
+        g.vx=(dx/absDx)*g.spd;
+        g.facing=dx>0?1:-1;
+      } else {
+        g.vx*=0.5;
+      }
+      g.wx+=g.vx;
+      if(g.onGround&&Math.abs(g.vx)>0.2)g.walkT=(g.walkT||0)+0.2;
+      // Attack when in range
+      if(absDx<50&&(g.atkCd||0)<=0){
+        g.atkCd=55;
+        hurtE(target,g.atk);
+        sf(target.wx,target.y-target.h,g.atk,'#88ff44');
+        burst(target.wx,target.y-target.h*0.4,'#88ff44',5);
+      }
+    } else {
+      // No enemies — drift toward player
+      const pdx=p.wx-g.wx;
+      g.vx=pdx>0?Math.min(g.spd,pdx*0.05):-Math.min(g.spd,Math.abs(pdx)*0.05);
+      g.wx+=g.vx;
+      g.facing=pdx>0?1:-1;
+    }
+    if((g.atkCd||0)>0)g.atkCd--;
+  });
+  ghouls=ghouls.filter(g=>g.life>0&&g.hp>0);
+}
+
+function updateMagicHUD(){updateSkillHUD();}
+function updateSkillHUD(){
+  const h=HEROES[heroIdx];
+  const skillData=[
+    {cd:mag1Cd,maxCd:h.skill1.cd,sk:h.skill1,id:'ms1'},
+    {cd:mag2Cd,maxCd:h.skill2.cd,sk:h.skill2,id:'ms2'},
+    {cd:mag3Cd,maxCd:h.skill3.cd,sk:h.skill3,id:'ms3'},
+  ];
+  skillData.forEach(s=>{
+    const icon=document.getElementById(s.id+'-icon');
+    const cdEl=document.getElementById(s.id+'-cd');
+    const emojiEl=document.getElementById(s.id+'-emoji');
+    const nameEl=document.getElementById(s.id+'-name');
+    if(emojiEl)emojiEl.textContent=s.sk.emoji;
+    if(nameEl)nameEl.textContent=s.sk.name;
+    if(icon)icon.style.background='linear-gradient(135deg,rgba(0,0,0,0.5),'+s.sk.color+'44)';
+    if(s.cd>0){
+      const secs=Math.ceil(s.cd/60);
+      if(cdEl){cdEl.textContent=secs;cdEl.style.display='flex';}
+      if(icon)icon.classList.remove('ready','active');
+    } else {
+      if(cdEl)cdEl.style.display='none';
+      if(icon)icon.classList.add('ready');
+      if(icon)icon.classList.remove('active');
+    }
+  });
+  // Skill description
+  const descEl=document.getElementById('skill-desc');
+  if(descEl)descEl.textContent=h.skill1.emoji+' '+h.skill1.name+' | '+h.skill2.emoji+' '+h.skill2.name+' | '+h.skill3.emoji+' '+h.skill3.name;
 }
 
 /* ═══════════════════════════════════════
@@ -1089,12 +1544,12 @@ function doUltimate(){
     duration:1200, // 20 seconds
     wobT:0,walkT:0,
     facing:player.facing,
-    airborne: heroIdx===2, // Wizard dragon flies
-    flyY: heroIdx===2?GROUND-100:GROUND, // Dragon hovers higher
+    airborne: heroIdx===0||heroIdx===3||heroIdx===5, // Paladin Eagle, Mage Dragon, Necro Bone Dragon fly
+    flyY: (heroIdx===0||heroIdx===3||heroIdx===5)?GROUND-100:GROUND,
     onGround: heroIdx!==2,
   };
   const names=['Griffin','Warhorse','Dragon','War Bear'];
-  const emojis=['🦅','🐴','🐉','🐻'];
+  const emojis=['🦅','🐻','🐴','🐉','🐆','🦴'];
   showMsg(emojis[heroIdx]+' '+names[heroIdx]+' summoned!','#ffd700',90);
   burst(player.wx,player.y-40,'#ffd700',20);
   burst(player.wx,player.y-40,md.col,14);
@@ -1108,115 +1563,128 @@ function doMountAbility(){
   const md=MOUNTS[heroIdx];
 
   if(heroIdx===0){
-    // Griffin — Talon Strike: plunge down, hit ALL on-screen enemies
-    showMsg('🦅 Talon Strike!','#d4aa40',60);
-    mount.vy=-12; // leap up first
-    setTimeout(()=>{
-      if(!mounted)return;
-      mount.vy=18; // then dive
-    },400);
+    // PALADIN Eagle — Eagle Scream: push ALL enemies to edge of map
+    showMsg('🦅 Eagle Scream!','#c8a840',70);
     enemies.forEach(e=>{
       if(e.dead)return;
       const ex=sx(e.wx);
-      if(ex>-80&&ex<CW+80){
-        const d=Math.floor(p.atk*5+p.mdef*2);
-        hurtE(e,d);sf(e.wx,e.y-e.h,d,'#d4aa40');
-        e.stunned=Math.min((e.stunned||0)+120,240);
-        e.knockback=(e.wx>mount.wx?1:-1)*8;
-        burst(e.wx,e.y-e.h*0.5,'#d4aa40',10);
-        burst(e.wx,e.y-e.h*0.5,'#fff',5);
+      if(ex>-200&&ex<CW+200){
+        // Push enemies toward nearest map edge
+        const pushDir=e.wx<(camX+CW*0.5)?-1:1;
+        e.knockback=pushDir*22;
+        e.stunned=Math.min((e.stunned||0)+60,120);
+        const d=Math.floor(p.atk*2);
+        hurtE(e,d);sf(e.wx,e.y-e.h,d,'#c8a840');
+        burst(e.wx,e.y-e.h*0.5,'#c8a840',8);
       }
     });
-    // Shockwave particles
-    for(let i=0;i<20;i++){
-      const a=i*Math.PI*2/20;
-      particles.push({wx:mount.wx,y:mount.y,vx:Math.cos(a)*7,vy:Math.sin(a)*4-3,
-        color:'#d4aa40',life:28,maxLife:28,alpha:1,r:6+Math.random()*4});
+    // Shockwave ring
+    for(let i=0;i<24;i++){
+      const a=i*Math.PI*2/24;
+      particles.push({wx:mount.wx+Math.cos(a)*30,y:mount.y-60,
+        vx:Math.cos(a)*8,vy:Math.sin(a)*4,
+        color:'#c8a840',life:30,maxLife:30,alpha:1,r:5+Math.random()*4});
     }
   }
   else if(heroIdx===1){
-    // Warhorse — War Stomp: AoE shockwave that stuns + massive damage near
-    showMsg('🐴 War Stomp!','#ffcc00',60);
-    const stompr=200;
+    // BARBARIAN Bear — Bear Charge
+    showMsg('🐻 Bear Charge!','#7a4a20',70);
+    mount.vx=mount.facing*26;
+    enemies.forEach(e=>{
+      if(e.dead)return;
+      const dx=(e.wx-mount.wx)*mount.facing;
+      if(dx>0&&dx<800&&Math.abs(e.y-mount.y)<65){
+        const d=Math.floor(p.atk*5+p.mdef);
+        hurtE(e,d);sf(e.wx,e.y-e.h,d,'#7a4a20');
+        e.knockback=mount.facing*14;
+        e.stunned=Math.min((e.stunned||0)+120,240); // 2s stun
+        burst(e.wx,e.y-e.h*0.4,'#7a4a20',10);
+      }
+    });
+    for(let i=0;i<18;i++){
+      particles.push({wx:mount.wx-mount.facing*(i*14),y:GROUND-Math.random()*18,
+        vx:-mount.facing*(1+Math.random()*3),vy:-2-Math.random()*4,
+        color:'#7a4a20',life:28,maxLife:28,alpha:1,r:6+Math.random()*7});
+    }
+  }
+  else if(heroIdx===2){
+    // TEMPLAR Warhorse — Trample: runs through enemies, constant damage
+    showMsg('🐴 Trample!','#ffcc00',60);
+    mount.vx=mount.facing*18;
     enemies.forEach(e=>{
       if(e.dead)return;
       const dist=Math.abs(e.wx-mount.wx);
-      if(dist<stompr){
-        const falloff=1-(dist/stompr)*0.5;
-        const d=Math.floor((p.atk*4+p.mdef)*falloff);
+      if(dist<300&&Math.abs(e.y-mount.y)<55){
+        const d=Math.floor(p.atk*3+p.mdef);
         hurtE(e,d);sf(e.wx,e.y-e.h,d,'#ffcc00');
-        e.stunned=Math.min((e.stunned||0)+150,300);
         e.knockback=(e.wx>mount.wx?1:-1)*10;
-        burst(e.wx,e.y-e.h*0.5,'#cc9900',8);
+        e.stunned=Math.min((e.stunned||0)+60,120);
+        burst(e.wx,e.y-e.h*0.4,'#ccaa00',8);
       }
     });
-    // Ground crack shockwave
-    for(let i=0;i<16;i++){
-      const a=i*Math.PI*2/16;
-      const r2=30+Math.random()*stompr;
-      particles.push({wx:mount.wx+Math.cos(a)*r2,y:GROUND,
-        vx:0,vy:-3-Math.random()*5,
-        color:i%2===0?'#cc9900':'#ffdd44',life:30,maxLife:30,alpha:1,r:7+Math.random()*5});
-    }
-    for(let i=0;i<8;i++){
-      particles.push({wx:mount.wx+(Math.random()-0.5)*60,y:GROUND,
-        vx:(Math.random()-0.5)*6,vy:-8-Math.random()*6,
-        color:'#5a3010',life:35,maxLife:35,alpha:1,r:8+Math.random()*6});
-    }
-    // Screen shake effect via HUD flash
     document.getElementById('hud').style.outline='3px solid #ffcc00';
     setTimeout(()=>document.getElementById('hud').style.outline='',300);
   }
-  else if(heroIdx===2){
-    // Dragon — Dragon Breath: SWEEPING FIRE BEAM across whole screen
+  else if(heroIdx===3){
+    // MAGE Fire Dragon — Dragon Breath: torches whole screen, burn
     showMsg('🐉 Dragon Breath!','#ff4400',80);
-    // Hit every enemy on screen
     enemies.forEach(e=>{
       if(e.dead)return;
       const ex=sx(e.wx);
       if(ex>-100&&ex<CW+100){
         const d=Math.floor(p.atk*3+p.mdef*1.5);
         hurtE(e,d);sf(e.wx,e.y-e.h,d,'#ff6600');
-        e.burning=Math.min((e.burning||0)+600,1200);
+        e.burning=Math.min((e.burning||0)+700,1400);
         burst(e.wx,e.y-e.h*0.5,'#ff4400',8);
-        burst(e.wx,e.y-e.h*0.5,'#ffaa00',5);
       }
     });
-    // Giant fire beam particles across entire width
-    const startX=mount.facing===1?mount.wx-200:mount.wx+200;
-    for(let i=0;i<60;i++){
-      const prog=i/60;
-      const wx=mount.wx+mount.facing*(prog*900);
-      const spread=(Math.random()-0.5)*80;
-      particles.push({wx:startX+mount.facing*prog*1000,y:mount.y-mount.facing*20+spread,
-        vx:mount.facing*(4+Math.random()*6),vy:(Math.random()-0.5)*3,
+    for(let i=0;i<55;i++){
+      const prog=i/55;
+      particles.push({wx:mount.wx+mount.facing*prog*900,y:mount.y-40+(Math.random()-0.5)*70,
+        vx:mount.facing*(5+Math.random()*6),vy:(Math.random()-0.5)*3,
         color:['#ff1100','#ff4400','#ff8800','#ffcc00','#ffffff'][Math.floor(Math.random()*5)],
-        life:25+Math.random()*20,maxLife:45,alpha:1,r:8+Math.random()*10});
+        life:22+Math.random()*18,maxLife:40,alpha:1,r:7+Math.random()*10});
     }
   }
-  else if(heroIdx===3){
-    // War Bear — Bear Charge: rampages across the entire level width destroying all
-    showMsg('🐻 BEAR CHARGE!','#7a4a20',80);
-    mount.vx=mount.facing*25; // explosive speed burst
-    // Line-of-path destruction
+  else if(heroIdx===4){
+    // ARCHER Panther — Panther Swipe: knockback + stun
+    showMsg('🐆 Panther Swipe!','#333333',60);
     enemies.forEach(e=>{
       if(e.dead)return;
       const dx=(e.wx-mount.wx)*mount.facing;
-      if(dx>0&&dx<800&&Math.abs(e.y-mount.y)<60){
-        const d=Math.floor(p.atk*6+p.mdef);
-        hurtE(e,d);sf(e.wx,e.y-e.h,d,'#7a4a20');
-        e.knockback=mount.facing*14;
-        e.stunned=Math.min((e.stunned||0)+60,120);
-        burst(e.wx,e.y-e.h*0.4,'#7a4a20',10);
-        burst(e.wx,e.y-e.h*0.4,'#cc4444',6);
+      if(dx>-20&&dx<180&&Math.abs(e.y-mount.y)<60){
+        const d=Math.floor(p.atk*4);
+        hurtE(e,d);sf(e.wx,e.y-e.h,d,'#aaaaaa');
+        e.knockback=mount.facing*12;
+        e.stunned=Math.min((e.stunned||0)+120,240);
+        burst(e.wx,e.y-e.h*0.4,'#555555',8);
       }
     });
-    // Dust trail particles
-    for(let i=0;i<20;i++){
-      particles.push({wx:mount.wx-mount.facing*(i*15),y:GROUND-Math.random()*20,
-        vx:-mount.facing*(1+Math.random()*3),vy:-2-Math.random()*4,
-        color:i%3===0?'#7a4a20':i%3===1?'#cc4444':'#885533',
-        life:30,maxLife:30,alpha:1,r:6+Math.random()*8});
+    for(let i=0;i<5;i++){
+      particles.push({wx:mount.wx+mount.facing*(30+i*20),y:mount.y-30+(Math.random()-0.5)*40,
+        vx:mount.facing*8,vy:(Math.random()-0.5)*5,
+        color:'#888888',life:18,maxLife:18,alpha:1,r:8+Math.random()*6});
+    }
+  }
+  else if(heroIdx===5){
+    // NECROMANCER Bone Dragon — Ice Breath: freeze all on screen for 2s
+    showMsg('🦴 Ice Breath!','#aaffff',70);
+    enemies.forEach(e=>{
+      if(e.dead)return;
+      const ex=sx(e.wx);
+      if(ex>-100&&ex<CW+100){
+        const d=Math.floor(p.atk*2+p.mdef);
+        hurtE(e,d);sf(e.wx,e.y-e.h,d,'#aaffff');
+        e.frozen=Math.min((e.frozen||0)+120,240); // 2s freeze
+        burst(e.wx,e.y-e.h*0.5,'#aaffff',8);
+        burst(e.wx,e.y-e.h*0.5,'#ffffff',4);
+      }
+    });
+    for(let i=0;i<40;i++){
+      particles.push({wx:mount.wx+mount.facing*Math.random()*800,y:mount.y-30+(Math.random()-0.5)*80,
+        vx:mount.facing*(4+Math.random()*5),vy:(Math.random()-0.5)*3,
+        color:['#aaffff','#ccffff','#ffffff','#88ddff'][Math.floor(Math.random()*4)],
+        life:28+Math.random()*18,maxLife:46,alpha:1,r:5+Math.random()*8});
     }
   }
 }
@@ -1391,13 +1859,17 @@ function render(){
   drawBG();
 
   // Depth sort — include mount when active
+  // Widen culling when mounted airborne so enemies don't visually vanish
+  const cullPad=(mounted&&mount&&mount.airborne)?600:e=>e.w+10;
   const ents=[...enemies.filter(e=>!e.dead&&sx(e.wx)>-(mounted&&mount&&mount.airborne?600:e.w+10)&&sx(e.wx)<CW+(mounted&&mount&&mount.airborne?600:e.w+10)),{__p:true},{__sk:true}];
   if(mounted&&mount)ents.push({__m:true});
-  ents.sort((a,b)=>(a.__p?player.y:a.__sk?sidekick.y:a.__m?mount.y+10:a.y)-(b.__p?player.y:b.__sk?sidekick.y:b.__m?mount.y+10:b.y));
+  ghouls.filter(g=>g.life>0&&g.hp>0).forEach(g=>ents.push({__g:g}));
+  ents.sort((a,b)=>(a.__p?player.y:a.__sk?sidekick.y:a.__m?mount.y+10:a.__g?a.__g.y:a.y)-(b.__p?player.y:b.__sk?sidekick.y:b.__m?mount.y+10:b.__g?b.__g.y:b.y));
   ents.forEach(e=>{
     if(e.__p)drawHero(player);
     else if(e.__sk)drawSidekick(sidekick);
     else if(e.__m)drawMount(mount);
+    else if(e.__g)drawGhoul(e.__g);
     else drawEnemy(e);
   });
 
@@ -1819,6 +2291,45 @@ function drawMount(m){
   ctx.strokeText(lbl,x,barY-2);ctx.fillText(lbl,x,barY-2);
   ctx.restore();
 
+  ctx.restore();
+}
+
+/* ═══════════════════════════════════════
+   DRAW GHOUL (Necromancer's raised dead)
+═══════════════════════════════════════ */
+function drawGhoul(g){
+  const x=sx(g.wx),y=g.y;
+  const f=g.facing,bob=Math.sin(g.wobT||0)*3;
+  const wt=g.walkT||0;
+  ctx.save();
+  ctx.globalAlpha=0.85;
+  // Shadow
+  ctx.fillStyle='rgba(0,0,0,0.2)';ctx.beginPath();ctx.ellipse(x,GROUND+2,14,4,0,0,Math.PI*2);ctx.fill();
+  // Body — rotten green-grey
+  ctx.fillStyle='#4a6040';ctx.strokeStyle='#1a2a10';ctx.lineWidth=2.5;
+  ctx.fillRect(x-9,y-36+bob,18,26);ctx.strokeRect(x-9,y-36+bob,18,26);
+  // Legs
+  ctx.fillStyle='#3a5030';
+  ctx.fillRect(x-8,y-12+bob+Math.sin(wt)*7,7,14);ctx.strokeRect(x-8,y-12+bob+Math.sin(wt)*7,7,14);
+  ctx.fillRect(x+1, y-12+bob+Math.sin(wt+Math.PI)*7,7,14);ctx.strokeRect(x+1,y-12+bob+Math.sin(wt+Math.PI)*7,7,14);
+  // Arms (outstretched)
+  ctx.fillStyle='#4a6040';
+  ctx.fillRect(x-18,y-34+bob+Math.sin(wt)*5,10,18);ctx.strokeRect(x-18,y-34+bob+Math.sin(wt)*5,10,18);
+  ctx.fillRect(x+8, y-34+bob+Math.sin(wt+1)*5,10,18);ctx.strokeRect(x+8,y-34+bob+Math.sin(wt+1)*5,10,18);
+  // Head
+  ctx.fillStyle='#506845';ctx.strokeStyle='#1a2a10';ctx.lineWidth=2.5;
+  ctx.beginPath();ctx.arc(x,y-44+bob,12,0,Math.PI*2);ctx.fill();ctx.stroke();
+  // Glowing eyes
+  ctx.fillStyle='#88ff44';
+  ctx.beginPath();ctx.arc(x+f*4,y-46+bob,3.5,0,Math.PI*2);ctx.fill();
+  ctx.beginPath();ctx.arc(x-f*1,y-46+bob,3.5,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='rgba(136,255,68,0.3)';
+  ctx.beginPath();ctx.arc(x,y-44+bob,14,0,Math.PI*2);ctx.fill();
+  // HP bar
+  const pct=g.hp/g.maxHp;
+  ctx.fillStyle='rgba(0,0,0,0.6)';ctx.fillRect(x-16,y-60+bob,32,5);
+  ctx.fillStyle=pct>0.5?'#88ff44':pct>0.25?'#ffaa00':'#ff3300';
+  ctx.fillRect(x-15,y-59+bob,30*pct,3);
   ctx.restore();
 }
 
