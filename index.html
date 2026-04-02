@@ -421,7 +421,7 @@ function startLevel(lvlIdx){
   totalEnemiesInLevel=lvl.enemyCount+1; // +1 for boss
   enemiesKilled=0;bossSpawned=false;bossKilled=false;
   spawnedCount=0;spawnTimer=0;
-  enemies=[];particles=[];arrows=[];mbolts=[];floaters=[];firewalls=[];meteors=[];
+  enemies=[];particles=[];arrows=[];mbolts=[];floaters=[];firewalls=[];meteors=[];ghouls=[];consecrateFx=[];
   mag1Cd=0;mag2Cd=0;mag3Cd=0;
   ultCd=0;mounted=false;mount=null;
   const mbEl2=document.getElementById("mount-bar");
@@ -578,6 +578,7 @@ function update(){
 
   /* Sidekick AI */
   updateSidekick();
+  updateClassStates();
 
   /* Projectiles */
   arrows.forEach(a=>{a.wx+=a.vx;a.y+=a.vy;a.vy+=0.25;a.life--;});
@@ -1021,6 +1022,23 @@ function doMag3(){
   showMsg("💨 Fire Blast!","#ff4400",45);
 }
 
+
+function updateClassStates(){
+  const p=player;
+  if(berserkActive){berserkTimer--;if(berserkTimer<=0)berserkActive=false;else if(berserkTimer%8===0)particles.push({wx:p.wx+(Math.random()-0.5)*20,y:p.y-p.h*0.5+(Math.random()-0.5)*20,vx:(Math.random()-0.5)*3,vy:-2-Math.random()*2,color:'#ff2200',life:18,maxLife:18,alpha:0.7,r:4+Math.random()*4});}
+  if(shieldActive){shieldTimer--;if(shieldTimer<=0)shieldActive=false;else{p.iCd=10;if(shieldTimer%4===0)particles.push({wx:p.wx+(Math.random()-0.5)*30,y:p.y-p.h*0.5+(Math.random()-0.5)*30,vx:(Math.random()-0.5)*2,vy:-1,color:'#ffffff',life:14,maxLife:14,alpha:0.6,r:4+Math.random()*5});}}
+  if(shiningSwordActive){shiningSwordTimer--;if(shiningSwordTimer<=0)shiningSwordActive=false;else if(shiningSwordTimer%5===0)particles.push({wx:p.wx+p.facing*30,y:p.y-p.h*0.7+(Math.random()-0.5)*25,vx:p.facing*3+(Math.random()-0.5)*2,vy:-1,color:'#ffff44',life:12,maxLife:12,alpha:0.8,r:5+Math.random()*5});}
+  if(tornadoActive){tornadoTimer--;if(tornadoTimer<=0)tornadoActive=false;else{enemies.forEach(e=>{if(!e.dead&&Math.abs(e.wx-p.wx)<120&&Math.abs(e.y-p.y)<50&&e.atkCd<=0){hurtE(e,Math.floor(p.atk*0.6));e.knockback=(e.wx>p.wx?1:-1)*3;e.atkCd=20;}});if(tornadoTimer%3===0){const a=Date.now()*0.05;particles.push({wx:p.wx+Math.cos(a)*55,y:p.y-p.h*0.3+Math.sin(a)*20,vx:Math.cos(a+1)*4,vy:Math.sin(a+1)*4,color:'#ff8800',life:16,maxLife:16,alpha:0.8,r:7+Math.random()*5});}}}
+  if(evadeActive){evadeTimer--;if(evadeTimer<=0)evadeActive=false;else p.iCd=10;}
+  if(healthSyphonActive&&Math.floor(Date.now()/500)%2===0){enemies.forEach(e=>{if(!e.dead&&Math.abs(e.wx-p.wx)<140){const d=Math.max(1,Math.floor(p.atk*0.08));hurtE(e,d);p.hp=Math.min(p.maxHp,p.hp+d*0.5);particles.push({wx:e.wx,y:e.y-e.h*0.5,vx:(p.wx-e.wx)*0.04,vy:-2,color:'#cc44ff',life:20,maxLife:20,alpha:0.8,r:5});updateHUD();}});}
+  if(arrowRainActive&&arrowRainTimer>0){arrowRainTimer--;if(arrowRainTimer<=0)arrowRainActive=false;else if(arrowRainTimer%6===0){arrows.push({wx:arrowRainX+(Math.random()-0.5)*320,y:-20,vx:(Math.random()-0.5)*1.5,vy:14,life:60,col:'#88ff44',rain:true});}}
+  if(mounted&&mount&&heroIdx===3){mountBreathTimer++;if(mountBreathTimer>=120){mountBreathTimer=0;enemies.forEach(e=>{if(!e.dead){const dx=(e.wx-mount.wx)*mount.facing;if(dx>-20&&dx<300&&Math.abs(e.y-mount.y)<100){const d=Math.floor(p.atk*1.5);hurtE(e,d);sf(e.wx,e.y-e.h,d,'#ff6600');e.burning=Math.min((e.burning||0)+200,600);burst(e.wx,e.y-e.h*0.4,'#ff6600',5);}}});for(let i=0;i<10;i++)particles.push({wx:mount.wx+mount.facing*(60+i*20),y:mount.y-30+(Math.random()-0.5)*40,vx:mount.facing*(4+Math.random()*4),vy:(Math.random()-0.5)*2,color:['#ff2200','#ff6600','#ffaa00'][Math.floor(Math.random()*3)],life:20,maxLife:20,alpha:0.8,r:6+Math.random()*8});}}
+  consecrateFx.forEach(z=>{z.life--;z.wobT=(z.wobT||0)+0.08;if(z.life%16===0)enemies.forEach(e=>{if(!e.dead&&Math.abs(e.wx-z.wx)<z.r&&Math.abs(e.y-z.y)<50){const d=Math.max(1,Math.floor(p.atk*0.25));hurtE(e,d);sf(e.wx,e.y-e.h,''+d,'#ffd700');}});if(z.life%6===0)particles.push({wx:z.wx+(Math.random()-0.5)*z.r*2,y:GROUND-Math.random()*30,vx:(Math.random()-0.5)*2,vy:-2-Math.random()*3,color:'#ffd700',life:25,maxLife:25,alpha:1,r:4+Math.random()*4});});
+  consecrateFx=consecrateFx.filter(z=>z.life>0);
+  for(let ai=arrows.length-1;ai>=0;ai--){const a=arrows[ai];if(a.bomb&&(a.y>=GROUND-10||a.life<60)){a.bomb=false;const bx=a.wx,by=Math.min(a.y,GROUND-5);burst(bx,by,'#ff8800',20);burst(bx,by,'#ffff00',10);enemies.forEach(e=>{if(!e.dead&&Math.hypot(e.wx-bx,e.y-by)<110){const d=Math.floor(p.atk*2.5);hurtE(e,d);sf(e.wx,e.y-e.h,d,'#ff8800');e.burning=Math.min((e.burning||0)+200,400);e.knockback=(e.wx>bx?1:-1)*8;}});}}
+  ghouls.forEach(g=>{g.life--;g.wobT=(g.wobT||0)+0.07;if(g.life<=0)return;g.vy=Math.min((g.vy||0)+GRAV,MAXFALL);g.y+=g.vy;if(g.y>=GROUND){g.y=GROUND;g.vy=0;g.onGround=true;}g.wx=Math.max(camX+5,Math.min(camX+CW-5,g.wx));let target=null,best=Infinity;enemies.forEach(e=>{if(!e.dead){const d=Math.abs(e.wx-g.wx);if(d<best){best=d;target=e;}}});if(target){const dx=target.wx-g.wx,absDx=Math.abs(dx);if(absDx>35){g.vx=(dx/absDx)*g.spd;g.facing=dx>0?1:-1;}else g.vx*=0.5;g.wx+=g.vx;if(g.onGround&&Math.abs(g.vx)>0.2)g.walkT=(g.walkT||0)+0.2;if(absDx<50&&(g.atkCd||0)<=0){g.atkCd=55;hurtE(target,g.atk);sf(target.wx,target.y-target.h,g.atk,'#88ff44');burst(target.wx,target.y-target.h*0.4,'#88ff44',5);}}else{const pdx=p.wx-g.wx;g.vx=pdx>0?Math.min(g.spd,pdx*0.05):-Math.min(g.spd,Math.abs(pdx)*0.05);g.wx+=g.vx;g.facing=pdx>0?1:-1;}if((g.atkCd||0)>0)g.atkCd--;});
+  ghouls=ghouls.filter(g=>g.life>0&&g.hp>0);
+}
 function updateMagicHUD(){
   const skills=[
     {cdVal:mag1Cd,cdMax:MAG1_CD,id:"ms1"},
@@ -1373,7 +1391,7 @@ function render(){
   drawBG();
 
   // Depth sort — include mount when active
-  const ents=[...enemies.filter(e=>!e.dead&&sx(e.wx)>-e.w-10&&sx(e.wx)<CW+e.w+10),{__p:true},{__sk:true}];
+  const ents=[...enemies.filter(e=>!e.dead&&sx(e.wx)>-(mounted&&mount&&mount.airborne?600:e.w+10)&&sx(e.wx)<CW+(mounted&&mount&&mount.airborne?600:e.w+10)),{__p:true},{__sk:true}];
   if(mounted&&mount)ents.push({__m:true});
   ents.sort((a,b)=>(a.__p?player.y:a.__sk?sidekick.y:a.__m?mount.y+10:a.y)-(b.__p?player.y:b.__sk?sidekick.y:b.__m?mount.y+10:b.y));
   ents.forEach(e=>{
