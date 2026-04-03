@@ -240,7 +240,7 @@ const HEROES=[
    desc:'Shield & Sword', stats:{spd:1.10,jump:7.8,atk:24,mdef:22,hp:160},
    skill1:{name:'Ground Smite',key:'U',emoji:'💥',color:'#88ccff',cd:300},
    skill2:{name:'Shield',   key:'I', emoji:'🛡', color:'#ffffff', cd:360},
-   skill3:{name:'Shining Sword',key:'O',emoji:'⚡',color:'#ffff88',cd:480}},
+   skill3:{name:'Sword Grave',key:'O',emoji:'🗡️',color:'#88ccff',cd:480}},
   // 3: Mage
   {name:'Mage',       emoji:'🔮', col:'#9944cc', ol:'#5a1a88', belt:'#3a1060', magic:'#cc88ff', mfx:'burn',
    desc:'Elemental magic', stats:{spd:1.10,jump:7.8,atk:16,mdef:28,hp:110},
@@ -741,6 +741,7 @@ function update(){
     if(e.stunned>0){e.stunned--;return;}
     if(e.frozen>0){e.frozen--;return;}
     if(e.burning>0){e.burning--;if(e.burning%20===0){hurtE(e,7);burst(e.wx,e.y,'#ff6633',3);}}
+    if(e.rotCloud>0){e.rotCloud--;if(e.rotCloud%4===0){const rca=Math.random()*Math.PI*2,rcr=20+Math.random()*14;particles.push({wx:e.wx+Math.cos(rca)*rcr,y:e.y-e.h*0.4+Math.sin(rca)*rcr*0.5,vx:Math.cos(rca)*0.8,vy:-0.5,color:'#44ff44',life:18,maxLife:18,alpha:0.6,r:7+Math.random()*5});}}
 
     const dx=p.wx-e.wx;
     const absDx=Math.abs(dx);
@@ -1059,19 +1060,13 @@ function doSkillHeal(){
   }
 }
 function doSkillSmite(){
-  // Light pillar comes down from sky in an AoE in front
   const cx=player.wx+player.facing*160;
   showMsg('✨ Smite!','#ffff44',55);
-  // Visual: tall light column
-  for(let i=0;i<30;i++){
-    particles.push({wx:cx+(Math.random()-0.5)*60,y:-20+Math.random()*GROUND,
-      vx:(Math.random()-0.5)*2,vy:6+Math.random()*4,
-      color:i%3===0?'#ffffff':'#ffff88',life:30,maxLife:30,alpha:0.9,r:4+Math.random()*6});
-  }
-  // Damage AoE
+  if(!window.smitePillars)window.smitePillars=[];
+  window.smitePillars.push({wx:cx,life:40,maxLife:40});
   enemies.forEach(e=>{
     if(e.dead)return;
-    if(Math.abs(e.wx-cx)<90&&Math.abs(e.y-GROUND)<80){
+    if(Math.abs(e.wx-cx)<70&&Math.abs(e.y-GROUND)<80){
       const d=Math.floor(player.atk*3.5);
       hurtE(e,d);sf(e.wx,e.y-e.h,d,'#ffff44');
       e.stunned=Math.min((e.stunned||0)+120,240);
@@ -1200,9 +1195,7 @@ function doSkillLightning(){
 /* ── ARCHER skills ───────────────────────────────── */
 function doSkillBombArrow(){
   showMsg('💣 Bomb Arrow!','#ff8800',50);
-  const bx=player.wx+player.facing*60;
-  // Fire arrow that explodes
-  arrows.push({wx:player.wx,y:player.y-player.h*0.65,vx:player.facing*14,vy:-2.0,life:80,col:'#ff8800',bomb:true});
+  arrows.push({wx:player.wx,y:player.y-player.h*0.65,vx:player.facing*18,vy:-1.0,life:100,col:'#ff8800',bomb:true,big:true});
 }
 function doSkillArrowRain(){
   arrowRainActive=true;
@@ -1212,12 +1205,16 @@ function doSkillArrowRain(){
 }
 function doSkillEvade(){
   evadeActive=true;
-  evadeTimer=90; // 1.5 seconds
-  player.knockback=-player.facing*18; // jump back
+  evadeTimer=90;
+  player.knockback=-player.facing*18;
   player.vy=-7;
   player.onGround=false;
-  showMsg('💨 Evade!','#aaffaa',40);
-  burst(player.wx,player.y,'#aaffaa',10);
+  const heal=Math.floor(player.maxHp*0.5);
+  player.hp=Math.min(player.maxHp,player.hp+heal);
+  showMsg('💨 Evade! +'+heal+' HP','#aaffaa',50);
+  burst(player.wx,player.y,'#aaffaa',14);
+  burst(player.wx,player.y,'#ffffff',6);
+  updateHUD();
 }
 
 /* ── NECROMANCER skills ──────────────────────────── */
@@ -1240,9 +1237,10 @@ function doSkillRaiseDead(){
   }
 }
 function doSkillHealthSyphon(){
-  healthSyphonActive=!healthSyphonActive;
-  showMsg(healthSyphonActive?'🫀 Syphon ON!':'🫀 Syphon OFF','#cc44ff',50);
-  burst(player.wx,player.y-player.h*0.5,'#cc44ff',12);
+  healthSyphonActive=true;
+  healthSyphonTimer=300;
+  showMsg('🫀 Health Syphon!','#cc0000',55);
+  burst(player.wx,player.y-player.h*0.5,'#cc0000',16);
 }
 function doSkillRot(){
   showMsg('☠️ Rot!','#44ff44',50);
@@ -1252,7 +1250,7 @@ function doSkillRot(){
     const dx=(e.wx-player.wx)*player.facing;
     if(dx>-20&&dx<rotR&&Math.abs(e.y-player.y)<60){
       // Apply heavy burn (rot DoT)
-      e.burning=Math.min((e.burning||0)+500,900);
+      e.burning=Math.min((e.burning||0)+500,900);e.rotCloud=150;
       const d=Math.floor(player.atk*1.2);
       hurtE(e,d);sf(e.wx,e.y-e.h,d,'#44ff44');
       burst(e.wx,e.y-e.h*0.4,'#44ff44',6);
@@ -1322,11 +1320,20 @@ function updateClassStates(){
           }
         }
       });
-      if(tornadoTimer%3===0){
-        const a=Date.now()*0.05;
-        particles.push({wx:p.wx+Math.cos(a)*55,y:p.y-p.h*0.3+Math.sin(a)*20,
-          vx:Math.cos(a+1)*4,vy:Math.sin(a+1)*4,
-          color:'#ff8800',life:16,maxLife:16,alpha:0.8,r:7+Math.random()*5});
+      if(tornadoTimer%2===0){
+        const a=Date.now()*0.18;
+        const wr=52,arms=3;
+        for(let wi=0;wi<arms;wi++){
+          const wa=a+wi*(Math.PI*2/arms);
+          const wx2=p.wx+Math.cos(wa)*wr;
+          const wy2=p.y-p.h*0.4+Math.sin(wa)*wr*0.4;
+          particles.push({wx:wx2,y:wy2,vx:Math.cos(wa+1.2)*3,vy:Math.sin(wa+1.2)*2,
+            color:wi===0?'#ffffff':'#ff8800',life:10,maxLife:10,alpha:0.95,r:wi===0?9:5});
+        }
+        const ws=a*0.7,wr2=28+Math.sin(a)*12;
+        particles.push({wx:p.wx+Math.cos(ws)*wr2,y:p.y-p.h*0.3+Math.sin(ws)*wr2*0.5,
+          vx:Math.cos(ws+1.6)*5,vy:Math.sin(ws+1.6)*3-1,
+          color:'#ffcc44',life:14,maxLife:14,alpha:0.7,r:6+Math.random()*4});
       }
     }
   }
@@ -1362,10 +1369,11 @@ function updateClassStates(){
     arrowRainTimer--;
     if(arrowRainTimer<=0){arrowRainActive=false;}
     // Spawn a falling arrow every 6 frames
-    if(arrowRainTimer%6===0){
-      const rx=arrowRainX+(Math.random()-0.5)*320;
-      // Rain arrows: start above screen, fall straight down, hit enemies
-      arrows.push({wx:rx,y:-20,vx:(Math.random()-0.5)*1.5,vy:14,life:60,col:'#88ff44',rain:true});
+    if(arrowRainTimer%3===0){
+      for(let ri=0;ri<2;ri++){
+        const rx=arrowRainX+(Math.random()-0.5)*640;
+        arrows.push({wx:rx,y:-20,vx:(Math.random()-0.5)*2,vy:14,life:65,col:'#88ff44',rain:true});
+      }
     }
   }
 
